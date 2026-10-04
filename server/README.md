@@ -2,15 +2,25 @@
 
 Set `MONGO_URI` and a random `JWT_SECRET` of at least 32 characters in `server/.env` before starting the API. In production also set `CLIENT_ORIGIN` and `NODE_ENV=production`. See `.env.example` for the variable names. Tokens expire after one hour.
 
-The first account is registered once and receives the `admin` role:
+## Customer accounts
+
+Customers can create an account at `POST /api/auth/register`:
 
 ```http
 POST /api/auth/register
 Content-Type: application/json
 
-{"email":"admin@example.com","password":"use-a-strong-password"}
+{"name":"Traveler","email":"traveler@example.com","password":"use-a-strong-password"}
 ```
 
-After setup, registration is closed. Sign in at `POST /api/auth/login` with the same JSON shape. Both endpoints return a JWT in `token`. Protected admin endpoints are mounted under `/api/admin` and require `Authorization: Bearer <token>`; `GET /api/admin/me` returns the authenticated admin.
+Public sign-up creates only `user` accounts. Sign in at `POST /api/auth/login`. Registration and login set an `HttpOnly` session cookie; passwords and session tokens are not returned to or stored by browser JavaScript. `GET /api/auth/me` returns the current account, and `POST /api/auth/logout` clears the session cookie.
 
-The client workspace is available at `/admin`. Its protected API supports inquiry listing and status updates, package create/update/delete, destination create/update, and testimonial create/update/delete. Public API reads use the same MongoDB records, so published content updates are reflected on the public pages.
+## Admin accounts
+
+Admin sign-in uses `POST /api/auth/admin/login`. Public customer sign-up never creates an admin, and there is no public admin-registration endpoint. Provision the initial admin through a trusted deployment/database process and configure a strong `JWT_SECRET`.
+
+Protected admin endpoints are mounted under `/api/admin` and require an admin session. `GET /api/admin/me` returns the authenticated admin.
+
+## Frontend routing
+
+The Vercel frontend proxies `/api` to the Render API so the session cookie remains same-origin. Local Vite development proxies `/api` to `http://127.0.0.1:5000`. Public travel pages and their data APIs require a signed-in account.

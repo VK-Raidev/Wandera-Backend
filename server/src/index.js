@@ -14,6 +14,7 @@ const testimonialsRoutes = require('./routes/testimonials')
 const faqsRoutes = require('./routes/faqs')
 const authRoutes = require('./routes/auth')
 const adminRoutes = require('./routes/admin')
+const { requireAuth } = require('./middleware/requireAuth')
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler')
 
 const app = express()
@@ -53,8 +54,15 @@ const inquiryRateLimit = apiRateLimit(20, 'Too many trip requests. Try again in 
 
 app.use(helmet())
 app.use(cors({
+  credentials: true,
   origin(origin, callback) {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || origin === 'https://wandera-frontend-af9x.vercel.app') return callback(null, true)
+    const localOrigins = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:5174',
+    ]
+    if (!origin || allowedOrigins.includes(origin) || localOrigins.includes(origin) || origin === 'https://wandera-frontend-af9x.vercel.app') return callback(null, true)
     const error = new Error('This origin is not allowed to access the API')
     error.statusCode = 403
     return callback(error)
@@ -63,18 +71,18 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }))
 
 app.get('/api/health', (_request, response) => {
-  response.json({ status: 'ok', service: 'wanderlust-travels-api' })
+  response.json({ status: 'ok', service: 'yatrahub-api' })
 })
 
 app.get('/api/test', (_request, response) => {
   response.send('Server is running')
 })
 
-app.use('/api/destinations', destinationsRoutes)
-app.use('/api/packages', packagesRoutes)
-app.use('/api/inquiries', inquiryRateLimit, inquiriesRoutes)
-app.use('/api/testimonials', testimonialsRoutes)
-app.use('/api/faqs', faqsRoutes)
+app.use('/api/destinations', requireAuth, destinationsRoutes)
+app.use('/api/packages', requireAuth, packagesRoutes)
+app.use('/api/inquiries', requireAuth, inquiryRateLimit, inquiriesRoutes)
+app.use('/api/testimonials', requireAuth, testimonialsRoutes)
+app.use('/api/faqs', requireAuth, faqsRoutes)
 app.use('/api/auth', authRateLimit, authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use(notFoundHandler)
