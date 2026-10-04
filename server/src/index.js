@@ -49,7 +49,7 @@ const apiRateLimit = (limit, message) => rateLimit({
   legacyHeaders: false,
   message: { error: message },
 })
-const authRateLimit = apiRateLimit(10, 'Too many authentication attempts. Try again in 15 minutes.')
+const authRateLimit = apiRateLimit(100, 'Too many authentication attempts from this network. Try again in 15 minutes.')
 const inquiryRateLimit = apiRateLimit(20, 'Too many trip requests. Try again in 15 minutes.')
 
 app.use(helmet())

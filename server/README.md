@@ -15,6 +15,8 @@ Content-Type: application/json
 
 Public sign-up creates only `user` accounts. Sign in at `POST /api/auth/login`. Registration and login set an `HttpOnly` session cookie; passwords and session tokens are not returned to or stored by browser JavaScript. `GET /api/auth/me` returns the current account, and `POST /api/auth/logout` clears the session cookie.
 
+Sign-in allows 15 failed attempts per account in a 15-minute window. Successful sign-ins do not count, and the window resets automatically. A separate, higher network-level limit protects the authentication API without locking out everyone sharing a network after a few mistakes.
+
 ## Admin accounts
 
 Admin sign-in uses `POST /api/auth/admin/login`. Public customer sign-up never creates an admin, and there is no public admin-registration endpoint. Provision the initial admin through a trusted deployment/database process and configure a strong `JWT_SECRET`.
