@@ -54,7 +54,7 @@ const inquiryRateLimit = apiRateLimit(20, 'Too many trip requests. Try again in 
 app.use(helmet())
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return callback(null, true)
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || origin === 'https://wandera-frontend-af9x.vercel.app') return callback(null, true)
     const error = new Error('This origin is not allowed to access the API')
     error.statusCode = 403
     return callback(error)
